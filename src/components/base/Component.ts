@@ -1,5 +1,5 @@
 export abstract class Component<T> {
-	protected readonly container: HTMLElement;
+	public readonly container: HTMLElement;
 
 	protected constructor(container: HTMLElement) {
 		this.container = container;

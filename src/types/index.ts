@@ -37,6 +37,16 @@ export interface IOrderResponse {
 	total: number;
 }
 
+export interface IOrderForm {
+	payment: PaymentMethod;
+	address: string;
+}
+
+export interface IContactsForm {
+	email: string;
+	phone: string;
+}
+
 export interface IApiError {
 	error: string;
 }

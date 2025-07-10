@@ -11,7 +11,7 @@ export class Form<T> extends Component<IFormState> {
 	protected _submit: HTMLButtonElement;
 	protected _errors: HTMLElement;
 
-	constructor(protected container: HTMLFormElement, protected events: IEvents) {
+	constructor(public container: HTMLFormElement, protected events: IEvents) {
 		super(container);
 
 		this._submit = ensureElement<HTMLButtonElement>(
@@ -25,20 +25,23 @@ export class Form<T> extends Component<IFormState> {
 			const field = target.name as keyof T;
 			const value = target.value;
 			this.onInputChange(field, value);
+			if (this.events && typeof this.events.emit === 'function') {
+				this.events.emit(`${this.container.name}.${String(field)}:change`, {
+					field,
+					value,
+				});
+			}
 		});
 
 		this.container.addEventListener('submit', (e: Event) => {
 			e.preventDefault();
-			this.events.emit(`${this.container.name}:submit`);
+			if (this.events && typeof this.events.emit === 'function') {
+				this.events.emit(`${this.container.name}:submit`);
+			}
 		});
 	}
 
-	protected onInputChange(field: keyof T, value: string) {
-		this.events.emit(`${this.container.name}.${String(field)}:change`, {
-			field,
-			value,
-		});
-	}
+	protected onInputChange(field: keyof T, value: string) {}
 
 	set valid(value: boolean) {
 		this._submit.disabled = !value;
@@ -53,5 +56,11 @@ export class Form<T> extends Component<IFormState> {
 		super.render({ valid, errors });
 		Object.assign(this, inputs);
 		return this.container;
+	}
+
+	reset() {
+		(this.container as HTMLFormElement).reset();
+		this.valid = false;
+		this.errors = '';
 	}
 }

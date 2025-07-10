@@ -1,32 +1,75 @@
 import { Component } from './base/Component';
 import { IProduct } from '../types';
+import { ensureElement } from '../utils/utils';
 
 export class ProductCard extends Component<IProduct> {
-	constructor(element: HTMLElement) {
-		super(element);
+	protected _title: HTMLElement;
+	protected _price: HTMLElement;
+	protected _image?: HTMLImageElement;
+	protected _description?: HTMLElement;
+	protected _category?: HTMLElement;
+	protected _button?: HTMLButtonElement;
+
+	constructor(container: HTMLElement) {
+		super(container);
+
+		this._title = ensureElement<HTMLElement>('.card__title', container);
+		this._price = ensureElement<HTMLElement>('.card__price', container);
+		this._image = container.querySelector('.card__image');
+		this._description = container.querySelector('.card__text');
+		this._category = container.querySelector('.card__category');
+		this._button = container.querySelector('.card__button');
 	}
 
-	render(product: IProduct): HTMLElement {
-		this.container.className = 'card';
-		const { CDN_URL } = require('../utils/constants');
-		const imageUrl = product.image
-			? product.image.startsWith('http')
-				? product.image
-				: `${CDN_URL}/${product.image}`
-			: '';
-		const priceText =
-			product.price === null || product.price === undefined
-				? 'бесценно'
-				: `${product.price} синапсов`;
-		this.container.innerHTML = `
-      <img class="card__image" src="${imageUrl}" alt="${product.title}" />
-      <div class="card__content">
-        <h3 class="card__title">${product.title}</h3>
-        <div class="card__category">${product.category}</div>
-        <div class="card__price">${priceText}</div>
-        <div class="card__description">${product.description ?? ''}</div>
-      </div>
-    `;
-		return this.container;
+	set id(value: string) {
+		this.container.dataset.id = value;
+	}
+
+	get id(): string {
+		return this.container.dataset.id || '';
+	}
+
+	set title(value: string) {
+		this.setText(this._title, value);
+	}
+
+	set image(value: string) {
+		const CDN_URL = require('../utils/constants').CDN_URL;
+		const fullUrl =
+			value && !value.startsWith('http') ? `${CDN_URL}${value}` : value;
+		this.setImage(this._image, fullUrl, this.title);
+	}
+
+	set price(value: number | null) {
+		this.setText(this._price, value ? `${value} синапсов` : 'Бесценно');
+		if (!value && this._button) {
+			this._button.disabled = true;
+		}
+	}
+
+	set category(value: string) {
+		if (this._category) {
+			this.setText(this._category, value);
+			const categoryClasses = require('../utils/constants').settings;
+
+			this._category.className = 'card__category';
+
+			const modifierClass = categoryClasses[value];
+			if (modifierClass) {
+				this.toggleClass(this._category, modifierClass, true);
+			} else {
+				this.toggleClass(this._category, categoryClasses['другое'], true);
+			}
+		}
+	}
+
+	set description(value: string) {
+		if (this._description) {
+			this.setText(this._description, value);
+		}
+	}
+
+	get button(): HTMLButtonElement | undefined {
+		return this._button;
 	}
 }

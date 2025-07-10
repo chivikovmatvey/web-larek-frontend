@@ -1,4 +1,9 @@
-import { IOrderRequest, IOrderResponse } from '../types';
+import {
+	IOrderRequest,
+	IOrderResponse,
+	IOrderForm,
+	IContactsForm,
+} from '../types';
 import { EventEmitter } from '../components/base/Events';
 import { WebLarekApi } from './WebLarekApi';
 
@@ -12,14 +17,42 @@ export class Order {
 		this.emitter = emitter;
 	}
 
-	setStep1Data(payment: string, address: string) {
-		this.data.payment = payment as any;
-		this.data.address = address;
+	setOrderField(field: keyof IOrderForm, value: string) {
+		(this.data as any)[field] = value;
+		this.validateStep1();
 	}
 
-	setStep2Data(email: string, phone: string) {
-		this.data.email = email;
-		this.data.phone = phone;
+	setContactsField(field: keyof IContactsForm, value: string) {
+		(this.data as any)[field] = value;
+		this.validateStep2();
+	}
+
+	validateStep1() {
+		const errors: string[] = [];
+		let valid = true;
+		if (!this.data.address || this.data.address.trim().length < 5) {
+			errors.push('Введите корректный адрес доставки');
+			valid = false;
+		}
+		if (!this.data.payment) {
+			errors.push('Выберите способ оплаты');
+			valid = false;
+		}
+		this.emitter.emit('order:validation', { valid, errors });
+	}
+
+	validateStep2() {
+		const errors: string[] = [];
+		let valid = true;
+		if (!this.data.email || !/.+@.+\..+/.test(this.data.email)) {
+			errors.push('Введите корректный email');
+			valid = false;
+		}
+		if (!this.data.phone || this.data.phone.replace(/\D/g, '').length < 10) {
+			errors.push('Введите корректный телефон');
+			valid = false;
+		}
+		this.emitter.emit('contacts:validation', { valid, errors });
 	}
 
 	setItemsAndTotal(items: string[], total: number) {
