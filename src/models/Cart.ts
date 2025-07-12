@@ -19,16 +19,23 @@ export class Cart {
 		this.emitUpdate();
 	}
 
-	remove(product: IProduct) {
-		this.items = this.items.filter((i) => i.product.id !== product.id);
+	remove(productId: string) {
+		this.items = this.items.filter((i) => i.product.id !== productId);
 		this.emitUpdate();
 	}
 
 	getCart(): ICart {
 		return {
 			items: this.items,
-			total: this.items.reduce((sum, i) => sum + i.product.price * i.count, 0),
+			total: this.getTotal(),
 		};
+	}
+
+	getTotal(): number {
+		return this.items.reduce(
+			(sum, i) => sum + (i.product.price || 0) * i.count,
+			0
+		);
 	}
 
 	clear() {
@@ -37,7 +44,9 @@ export class Cart {
 	}
 
 	getProductIds(): string[] {
-		return this.items.map((i) => i.product.id);
+		return this.items
+			.filter((i) => i.product.price !== null && i.product.price !== undefined)
+			.map((i) => i.product.id);
 	}
 
 	private emitUpdate() {

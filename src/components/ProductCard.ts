@@ -2,6 +2,10 @@ import { Component } from './base/Component';
 import { IProduct } from '../types';
 import { ensureElement } from '../utils/utils';
 
+interface ICardActions {
+	onClick: (event: MouseEvent) => void;
+}
+
 export class ProductCard extends Component<IProduct> {
 	protected _title: HTMLElement;
 	protected _price: HTMLElement;
@@ -10,7 +14,7 @@ export class ProductCard extends Component<IProduct> {
 	protected _category?: HTMLElement;
 	protected _button?: HTMLButtonElement;
 
-	constructor(container: HTMLElement) {
+	constructor(container: HTMLElement, actions?: ICardActions) {
 		super(container);
 
 		this._title = ensureElement<HTMLElement>('.card__title', container);
@@ -19,6 +23,14 @@ export class ProductCard extends Component<IProduct> {
 		this._description = container.querySelector('.card__text');
 		this._category = container.querySelector('.card__category');
 		this._button = container.querySelector('.card__button');
+
+		if (actions?.onClick) {
+			if (this._button) {
+				this._button.addEventListener('click', actions.onClick);
+			} else {
+				container.addEventListener('click', actions.onClick);
+			}
+		}
 	}
 
 	set id(value: string) {

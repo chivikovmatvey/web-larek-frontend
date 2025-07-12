@@ -16,9 +16,6 @@ export class Modal {
 
 	open() {
 		this.modal.classList.add('modal_active');
-		document.body.style.overflow = 'hidden';
-		const wrapper = document.querySelector('.page__wrapper');
-		if (wrapper) wrapper.classList.add('page__wrapper_locked');
 		if (this.content) {
 			const content = this.modal.querySelector('.modal__content');
 			if (content) {
@@ -31,9 +28,6 @@ export class Modal {
 
 	close() {
 		this.modal.classList.remove('modal_active');
-		document.body.style.overflow = '';
-		const wrapper = document.querySelector('.page__wrapper');
-		if (wrapper) wrapper.classList.remove('page__wrapper_locked');
 		const content = this.modal.querySelector('.modal__content');
 		if (content) content.innerHTML = '';
 		this.emitter?.emit('modal:close');
