@@ -136,20 +136,22 @@ emitter.on('cart:open', () => {
 });
 
 emitter.on('cart:update', () => {
-	if (!cartView) return;
 	const cartData = cart.getCart();
-	const items = cartData.items.map((item, index) => {
-		const cardElement = cloneTemplate(cardBasketTemplate);
-		const card = new BasketCard(cardElement, emitter);
-		card.id = item.product.id;
-		card.index = index + 1;
-		card.title = item.product.title;
-		card.price = item.product.price;
-		return card.container;
-	});
-	cartView.items = items;
-	cartView.total = cartData.total;
-	mainPageView.setBasketCount(cart.getCart().items.length);
+	mainPageView.setBasketCount(cartData.items.length);
+
+	if (cartView) {
+		const items = cartData.items.map((item, index) => {
+			const cardElement = cloneTemplate(cardBasketTemplate);
+			const card = new BasketCard(cardElement, emitter);
+			card.id = item.product.id;
+			card.index = index + 1;
+			card.title = item.product.title;
+			card.price = item.product.price;
+			return card.container;
+		});
+		cartView.items = items;
+		cartView.total = cartData.total;
+	}
 });
 
 emitter.on('basket:delete', (data: { id: string }) => {
